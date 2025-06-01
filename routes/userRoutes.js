@@ -13,6 +13,11 @@ router.get('/', async (req, res) => {
     res.send(users);
 });
 
+// Get current user
+router.get('/currentUser', async(req, res)=>{
+    res.send(currentUser)
+})
+
 // Get a specific user by ID
 router.get('/:id', async (req, res) => {
     const user = await User.findById(req.params.id);
@@ -79,6 +84,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
+
 // Log out user
 
 router.post('/logout', (req, res) => {
@@ -97,7 +103,7 @@ router.delete('/:id', async (req, res) => {
 
         const user = await User.findById(req.params.id);
         if (user) {
-            if (isLoggedIn == true && user.username == currentUser.username) {
+            if (isLoggedIn == true && (user.username == currentUser.username || currentUser.isAdmin == true)) {
                 try {
                     const deleted = await User.findByIdAndDelete(req.params.id);
                     if (deleted) {

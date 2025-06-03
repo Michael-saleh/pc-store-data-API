@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get current user
-router.get('/currentUser', async(req, res)=>{
+router.get('/currentUser', async (req, res) => {
     res.send(currentUser)
 })
 
@@ -90,7 +90,7 @@ router.post('/login', async (req, res) => {
 router.post('/logout', (req, res) => {
     currentUser = null;
     isLoggedIn = false;
-    res.send("logged out")
+    res.send("logged out");
 })
 
 // Delete user by ID
@@ -107,7 +107,7 @@ router.delete('/:id', async (req, res) => {
                 try {
                     const deleted = await User.findByIdAndDelete(req.params.id);
                     if (deleted) {
-                        res.send(`${deleted.username} was deleted successfully`);
+                        res.send(deleted);
                     } else {
                         res.send("user not found");
                     }

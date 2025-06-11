@@ -4,8 +4,6 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const { User } = require('../models/userSchema');
 const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
 /* let currentUser = null;
 let isLoggedIn = false; */
 
@@ -65,51 +63,26 @@ router.post('/', async (req, res) => {
     }
 });
 
-
+// Login user
 router.post('/login', async (req, res) => {
-    try {
-        const user = await User.findOne({ username: req.body.username });
-
-        if (!user) {
-            return res.status(400).json({ message: "Wrong username or password" });
-        }
-
-        const match = await bcrypt.compare(req.body.password, user.password);
-
-        if (!match) {
-            return res.status(400).json({ message: "Wrong username or password" });
-        }
-
-        // Create a payload — keep it small and non-sensitive
-        const payload = {
-            id: user._id,
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            birthYear: user.birthYear,
-            isAdmin: user.isAdmin,
-            gender: user.gender
-        };
-
-        // Sign a token
-        const token = jwt.sign(payload, process.env.JWT_SECRET, {
-            expiresIn: process.env.JWT_EXPIRES_IN,
-        });
-
-        // Return token + user data (never return password!)
-        res.json({
-            token,
-            user: {
-                id: user._id,
-                username: user.username,
-                role: user.role,
+    const user = await User.findOne({ username: req.body.username });
+    if (user) {
+        bcrypt.compare(req.body.password, user.password, (err, result) => {
+            if (err) {
+                console.log(err.message)
+                res.send(err.message)
+            } else {
+                if (result == true) {
+                    res.send(user)
+                } else {
+                    console.log("wrong username or password");
+                    res.status(400).json({ message: "wrong username or password" });
+                }
             }
-        });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Server error" });
+        })
+    } else {
+        console.log("wrong username or password");
+        res.status(400).json({ message: "wrong username or password" });
     }
 });
 

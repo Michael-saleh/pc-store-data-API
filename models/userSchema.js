@@ -21,6 +21,13 @@ const userSchema = new mongoose.Schema({
         required: true
     },
 
+    email: {
+        type: String,
+        required: true
+    },
+
+    gender: String,
+
     birthYear: Number,
 
     isAdmin: Boolean,

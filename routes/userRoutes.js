@@ -6,8 +6,6 @@ const { User } = require('../models/userSchema');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-/* let currentUser = null;
-let isLoggedIn = false; */
 
 // Get all users
 router.get('/', async (req, res) => {
@@ -15,10 +13,6 @@ router.get('/', async (req, res) => {
     res.send(users);
 });
 
-// Get current user
-/* router.get('/currentUser', async (req, res) => {
-    res.send(currentUser)
-}) */
 
 // Get a specific user by ID
 router.get('/:id', async (req, res) => {
@@ -53,7 +47,6 @@ router.post('/', async (req, res) => {
                 }
                 catch (error) {
                     res.status(400).json({ message: error.message });
-                    console.log(error.message);
                 }
             }
         });
@@ -65,19 +58,26 @@ router.post('/', async (req, res) => {
     }
 });
 
-
+// login user
 router.post('/login', async (req, res) => {
+
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+    }
+
     try {
         const user = await User.findOne({ username: req.body.username });
 
         if (!user) {
-            return res.status(400).json({ message: "Wrong username or password" });
+            return res.status(401).json({ message: "Wrong username or password" });
         }
 
         const match = await bcrypt.compare(req.body.password, user.password);
 
         if (!match) {
-            return res.status(400).json({ message: "Wrong username or password" });
+            return res.status(401).json({ message: "Wrong username or password" });
         }
 
         // Create a payload — keep it small and non-sensitive
@@ -100,15 +100,10 @@ router.post('/login', async (req, res) => {
         // Return token + user data (never return password!)
         res.json({
             token,
-            user: {
-                id: user._id,
-                username: user.username,
-                role: user.role,
-            }
+            user: payload
         });
 
     } catch (err) {
-        console.error(err);
         res.status(500).json({ message: "Server error" });
     }
 });
@@ -116,8 +111,6 @@ router.post('/login', async (req, res) => {
 // Log out user
 
 router.post('/logout', (req, res) => {
-    /* currentUser = null;
-    isLoggedIn = false; */
     res.send("logged out");
 })
 

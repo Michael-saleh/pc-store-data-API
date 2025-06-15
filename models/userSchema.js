@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -43,4 +43,4 @@ const userSchema = new mongoose.Schema({
     }]
 })
 
-module.exports.User = new mongoose.model('User', userSchema);
+export const User = new mongoose.model('User', userSchema);

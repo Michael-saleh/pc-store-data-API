@@ -1,6 +1,7 @@
-const express = require('express');
+import express from "express";
+import { Product } from "../models/productSchema.js";
+
 const router = express.Router();
-const { Product } = require('../models/productSchema');
 
 // Get all products
 router.get('/', async (req, res) => {
@@ -8,4 +9,12 @@ router.get('/', async (req, res) => {
     res.send(products);
 });
 
-module.exports = router; 
+// Get a specific product
+router.get('/:id', async (req, res) => {
+    const { id } = req.params;
+    console.log(id)
+    const product = await Product.findById(id);
+    res.send(product);
+})
+
+export default router; 

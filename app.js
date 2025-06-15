@@ -1,16 +1,18 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import cors from "cors";
+
+// Import routes
+import userRoutes from "./routes/userRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+
 dotenv.config();
-const cors = require("cors");
 const app = express();
 const port = process.env.PORT;
 
-// Import routes
-const userRoutes = require('./routes/userRoutes');
-const commentRoutes = require('./routes/commentRoutes');
-const productRoutes = require('./routes/productRoutes');
-const orderRoutes = require('./routes/orderRoutes');
 
 app.use(cors());
 app.use(express.json());

@@ -1,6 +1,7 @@
-const express = require('express');
+import express from "express";
+import { Order } from "../models/orderSchema.js";
+
 const router = express.Router();
-const { Order } = require('../models/orderSchema');
 
 // Get all orders
 router.get('/', async (req, res) => {
@@ -8,4 +9,4 @@ router.get('/', async (req, res) => {
     res.send(orders);
 });
 
-module.exports = router; 
+export default router; 

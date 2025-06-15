@@ -1,11 +1,12 @@
-const express = require('express');
+import express from "express";
 const router = express.Router();
-const bcrypt = require('bcrypt');
+import bcrypt from "bcrypt";
 const saltRounds = 10;
-const { User } = require('../models/userSchema');
-const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
+import { User } from "../models/userSchema.js";
+import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
 // Get all users
 router.get('/', async (req, res) => {
@@ -62,7 +63,7 @@ router.post('/', async (req, res) => {
 router.post('/login', async (req, res) => {
 
     const { username, password } = req.body;
-    
+
     if (!username || !password) {
         return res.status(400).json({ message: "Username and password are required" });
     }
@@ -147,4 +148,4 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-module.exports = router; 
+export default router; 

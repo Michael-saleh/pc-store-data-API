@@ -6,6 +6,7 @@ import { User } from "../models/userSchema.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import authenticate from "../middlewares/authenticate.js"
 dotenv.config();
 
 // Get all users
@@ -116,7 +117,7 @@ router.post('/logout', (req, res) => {
 })
 
 // Delete user by ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
     try {
         // Validate if the ID is a valid MongoDB ObjectId
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -125,7 +126,6 @@ router.delete('/:id', async (req, res) => {
 
         const user = await User.findById(req.params.id);
         if (user) {
-            // if (isLoggedIn == true && (user.username == currentUser.username || currentUser.isAdmin == true)) {
             try {
                 const deleted = await User.findByIdAndDelete(req.params.id);
                 if (deleted) {
@@ -135,10 +135,8 @@ router.delete('/:id', async (req, res) => {
                 }
             } catch (error) {
                 res.send(error.message);
+                console.log(error)
             }
-            /* } else {
-                res.send("Not authorized")
-            } */
         } else {
             res.send("user not found")
         }
@@ -148,4 +146,4 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-export default router; 
+export default router;

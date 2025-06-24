@@ -26,7 +26,7 @@ const productSchema = new mongoose.Schema({
         required: false
     },
 
-    manifaturer: {
+    manifacturer: {
         type: String,
         required: true
     },

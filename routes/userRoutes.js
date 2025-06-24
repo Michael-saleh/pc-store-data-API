@@ -6,7 +6,7 @@ import { User } from "../models/userSchema.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import authenticate from "../middlewares/authenticate.js"
+import authenticate from "../middlewares/authenticate.js";
 dotenv.config();
 
 // Get all users
@@ -31,24 +31,35 @@ router.post('/', async (req, res) => {
             if (err) {
                 res.send(err)
             } else {
-                try {
-                    const newUser = new User({
-                        firstName: userData.firstName,
-                        lastName: userData.lastName,
-                        username: userData.username,
-                        email: userData.email,
-                        password: hash,
-                        birthYear: userData.birthYear,
-                        gender: userData.gender,
-                        isAdmin: userData.isAdmin || false,
-                        comments: [],
-                        orders: []
-                    });
-                    const savedUser = await newUser.save();
-                    res.status(201).json(savedUser);
-                }
-                catch (error) {
-                    res.status(400).json({ message: error.message });
+
+                if (await User.findOne({ email: userData.email })) {
+                    res.status(403).json({ message: "User with same email aleady registered" });
+                } else {
+
+                    if (await User.findOne({ username: userData.username })) {
+                        res.status(403).json({ message: "User with same username aleady registered" });
+                    } else {
+
+                        try {
+                            const newUser = new User({
+                                firstName: userData.firstName,
+                                lastName: userData.lastName,
+                                username: userData.username,
+                                email: userData.email,
+                                password: hash,
+                                birthYear: userData.birthYear,
+                                gender: userData.gender,
+                                isAdmin: userData.isAdmin || false,
+                                comments: [],
+                                orders: []
+                            });
+                            const savedUser = await newUser.save();
+                            res.status(201).json(savedUser);
+                        }
+                        catch (error) {
+                            res.status(400).json({ message: error.message });
+                        }
+                    }
                 }
             }
         });

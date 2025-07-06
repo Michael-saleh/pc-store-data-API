@@ -157,4 +157,18 @@ router.delete('/:id', authenticate, async (req, res) => {
     }
 });
 
+// Edit user info
+router.put('/:id', async (req, res) => {
+    try {
+        const updated = await User.findByIdAndUpdate(req.params.id, { $set: req.body }, { runValidators: true });
+        res.send(updated)
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+
+})
+
 export default router;
+
+
+// authenticate,

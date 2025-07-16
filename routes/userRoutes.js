@@ -27,17 +27,17 @@ router.post('/', async (req, res) => {
     try {
         const userData = req.body;
 
-        bcrypt.hash(userData.password, saltRounds, async function (err, hash) {
-            if (err) {
-                res.send(err)
+        bcrypt.hash(userData.password, saltRounds, async function (error, hash) {
+            if (error) {
+                res.status(400).json({ message: error.message })
             } else {
 
                 if (await User.findOne({ email: userData.email })) {
-                    res.status(403).json({ message: "User with same email aleady registered" });
+                    res.status(403).json({ message: "User with same email aleady exists" });
                 } else {
 
                     if (await User.findOne({ username: userData.username })) {
-                        res.status(403).json({ message: "User with same username aleady registered" });
+                        res.status(403).json({ message: "User with same username aleady exists" });
                     } else {
 
                         try {
@@ -64,10 +64,7 @@ router.post('/', async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(400).json({
-            message: "Error creating user",
-            error: error.message
-        });
+        res.status(400).json({ message: error.message });
     }
 });
 
@@ -93,7 +90,6 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: "Wrong username or password" });
         }
 
-        // Create a payload — keep it small and non-sensitive
         const payload = {
             id: user._id,
             username: user.username,
@@ -105,30 +101,19 @@ router.post('/login', async (req, res) => {
             gender: user.gender
         };
 
-        // Sign a token
         const token = jwt.sign(payload, process.env.JWT_SECRET, {
             expiresIn: process.env.JWT_EXPIRES_IN,
         });
 
-        // Return token + user data (never return password!)
-        res.json({
-            token,
-            user: payload
-        });
+        res.json({ token, user: payload });
 
     } catch (err) {
         res.status(500).json({ message: "Server error" });
     }
 });
 
-// Log out user
-
-router.post('/logout', (req, res) => {
-    res.send("logged out");
-})
-
 // Delete user by ID
-router.delete('/:id', authenticate, async (req, res) => {
+/* router.delete('/:id', authenticate, async (req, res) => {
     try {
         // Validate if the ID is a valid MongoDB ObjectId
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -146,14 +131,33 @@ router.delete('/:id', authenticate, async (req, res) => {
                 }
             } catch (error) {
                 res.send(error.message);
-                console.log(error)
             }
         } else {
             res.send("user not found")
         }
     }
-    catch (err) {
-        res.send(err.message)
+    catch (error) {
+        res.send(error.message)
+    }
+}); */
+
+
+router.delete('/:id', authenticate, async (req, res) => {
+    try {
+        // Validate if the ID is a valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ message: "Invalid user ID format" });
+        }
+        const deleted = await User.findByIdAndDelete(req.params.id);
+        if (!deleted) {
+            res.status(404).json({ message: "User not found" });
+        } else {
+            res.status(200).json(deleted);
+        }
+    }
+    catch (error) {
+        cconsole.log("this part was reached")
+        res.status(400).json({ message: error.message })
     }
 });
 
@@ -169,6 +173,3 @@ router.put('/:id', async (req, res) => {
 })
 
 export default router;
-
-
-// authenticate,

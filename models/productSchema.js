@@ -28,7 +28,7 @@ const productSchema = new mongoose.Schema({
 
     manifacturer: {
         type: String,
-        required: true
+        required: false
     },
 
 

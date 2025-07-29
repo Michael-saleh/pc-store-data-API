@@ -15,57 +15,57 @@ router.get('/', async (req, res) => {
     res.send(users);
 });
 
-
 // Get a specific user by ID
 router.get('/:id', async (req, res) => {
     const user = await User.findById(req.params.id);
-    res.send(user);
+    if (!user) {
+        res.status(404).json({ message: "User not found" })
+    } else {
+        res.json(user);
+    }
+
 });
 
 // Create new user
 router.post('/', async (req, res) => {
-    try {
-        const userData = req.body;
+    const userData = req.body;
 
-        bcrypt.hash(userData.password, saltRounds, async function (error, hash) {
-            if (error) {
-                res.status(400).json({ message: error.message })
+    bcrypt.hash(userData.password, saltRounds, async function (error, hash) {
+        if (!error) {
+            const userExists = await User.findOne({ $or: [{ email: userData.email }, { username: userData.username }] });
+
+            if (!userExists) {
+                try {
+                    const newUser = new User({
+                        firstName: userData.firstName,
+                        lastName: userData.lastName,
+                        username: userData.username,
+                        email: userData.email,
+                        password: hash,
+                        birthYear: userData.birthYear,
+                        gender: userData.gender,
+                        isAdmin: userData.isAdmin || false,
+                        comments: [],
+                        orders: []
+                    });
+                    const savedUser = await newUser.save();
+                    res.json(savedUser);
+                }
+                catch (error) {
+                    res.status(400).json({ message: error.message });
+                }
             } else {
-
-                if (await User.findOne({ email: userData.email })) {
+                if (userExists.email == userData.email) {
                     res.status(403).json({ message: "User with same email aleady exists" });
                 } else {
-
-                    if (await User.findOne({ username: userData.username })) {
-                        res.status(403).json({ message: "User with same username aleady exists" });
-                    } else {
-
-                        try {
-                            const newUser = new User({
-                                firstName: userData.firstName,
-                                lastName: userData.lastName,
-                                username: userData.username,
-                                email: userData.email,
-                                password: hash,
-                                birthYear: userData.birthYear,
-                                gender: userData.gender,
-                                isAdmin: userData.isAdmin || false,
-                                comments: [],
-                                orders: []
-                            });
-                            const savedUser = await newUser.save();
-                            res.status(201).json(savedUser);
-                        }
-                        catch (error) {
-                            res.status(400).json({ message: error.message });
-                        }
-                    }
+                    res.status(403).json({ message: "User with same username aleady exists" });
                 }
             }
-        });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+        } else {
+            res.status(400).json({ message: error.message })
+
+        }
+    });
 });
 
 // login user
@@ -113,35 +113,6 @@ router.post('/login', async (req, res) => {
 });
 
 // Delete user by ID
-/* router.delete('/:id', authenticate, async (req, res) => {
-    try {
-        // Validate if the ID is a valid MongoDB ObjectId
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ message: "Invalid user ID format" });
-        }
-
-        const user = await User.findById(req.params.id);
-        if (user) {
-            try {
-                const deleted = await User.findByIdAndDelete(req.params.id);
-                if (deleted) {
-                    res.send(deleted);
-                } else {
-                    res.send("user not found");
-                }
-            } catch (error) {
-                res.send(error.message);
-            }
-        } else {
-            res.send("user not found")
-        }
-    }
-    catch (error) {
-        res.send(error.message)
-    }
-}); */
-
-
 router.delete('/:id', authenticate, async (req, res) => {
     try {
         // Validate if the ID is a valid MongoDB ObjectId
@@ -156,7 +127,6 @@ router.delete('/:id', authenticate, async (req, res) => {
         }
     }
     catch (error) {
-        cconsole.log("this part was reached")
         res.status(400).json({ message: error.message })
     }
 });
@@ -170,6 +140,6 @@ router.put('/:id', async (req, res) => {
         res.status(400).json({ message: err.message });
     }
 
-})
+});
 
 export default router;
